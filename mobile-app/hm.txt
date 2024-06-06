@@ -1,0 +1,75 @@
+1. Поменять модель базы данных +реализовать updateDoc()
+2. Добавить других стилей
+
+
+
+
+  return (
+    <View style={styles.page}>
+      {!isLoad ? (
+        <Text style={styles.text}>Loading...</Text>
+      ) : (
+        <>
+          <Text style={styles.title}>Password Generator</Text>
+          <View style={styles.inputContainer}>
+            <Text style={styles.text}>Limit password length</Text>
+            <TextInput
+              keyboardType="numeric"
+              value={limit}
+              onChangeText={setLimit}
+              style={styles.input}
+              placeholder="Enter length"
+            />
+            <Button onPress={generatePass} title="Generate" />
+          </View>
+          <View>
+            <Text style={styles.title}>Password History</Text>
+            {passArr.map((data) => (
+              <View key={data.id} style={styles.passwordItem}>
+                <Text style={styles.text}>{data.pass}</Text>
+                <Button onPress={() => DeletePass(data.id)} title="Delete" />
+                <Button onPress={() => UpdatePass(data.id)} title="Update" />
+              </View>
+            ))}
+          </View>
+        </>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f0f0f0',
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  text: {
+    color: 'black',
+    marginBottom: 5,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  input: {
+    backgroundColor: '#e0e0e0',
+    padding: 10,
+    marginBottom: 10,
+  },
+  passwordItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    backgroundColor: '#d0d0d0',
+    padding: 10,
+    borderRadius: 5,
+  },
+});
