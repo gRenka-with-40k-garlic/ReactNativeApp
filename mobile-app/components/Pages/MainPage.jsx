@@ -1,8 +1,7 @@
-import { addDoc, collection, deleteDoc, doc, getDocs } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Button, StyleSheet, Text, TextInput, View } from "react-native"
 //import { db } from "../../services/firebase/config";
-
 import db from "../../services/firebase/config";
 
 export const MainPage = () => {
@@ -16,6 +15,7 @@ export const MainPage = () => {
     
     const generatePass = async () => {
         setIsLoad(false);
+        
         let res = '';
         for (let i = 0, len = passSym.length; i < limit; ++i) {
           res += passSym.charAt(Math.floor(Math.random() * len));
@@ -24,7 +24,7 @@ export const MainPage = () => {
           generatePass();
         } else {
           setText(res);
-          const currentTime = new Date().toISOString();
+          const currentTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Novosibirsk"});
           const passData = { pass: res, created_at: currentTime };
           const addRef = await addDoc(collection(db, 'pass'), passData);
           getDB().then(() => setIsLoad(true));
@@ -54,38 +54,34 @@ export const MainPage = () => {
         });
       };
     
-      //не работает
+      const genNewPass = () => { 
+        let res = ''; 
+        for (let i = 0, len = passSym.length; i < limit; ++i) { 
+            res += passSym.charAt(Math.floor(Math.random() * len));
+        } 
+         
+        if (res[0] === '!' || res[0] === '@' || res[0] === '$' || res[0] === '_') { 
+            res = genPass(); 
+        } 
+ 
+        return res; 
+    }; 
+ 
+    const UpdatePass = (id) => { 
+        if(id) { 
+            setIsLoad(false); 
+ 
+            const currentTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Novosibirsk"}); 
+            const docRef =  doc(db, 'pass', id); 
+            const newPass = genNewPass(); 
+            const newPassDoc = {pass: newPass, created_at: currentTime}; 
+ 
+            updateDoc(docRef, newPassDoc) 
+                .then(() => getDB())
+                .then(() => setIsLoad(true));   
+        }  
+    };
       
-      const UpdatePass = async (id) => {
-        setIsLoad(false);
-        const docRef = doc(db, "pass", id);
-        const newPass = genPass();
-    
-        const newPassDoc = { pass: newPass };
-    
-        try {
-          await updateDoc(docRef, newPassDoc);
-          setIsLoad(true);
-        } catch (error) {
-          setIsLoad(true);
-          console.error("Error updating document: ", error);
-        }
-      };
-    
-      const UpdateDoc = async (id, newData) => {
-        setIsLoad(false);
-        const docRef = doc(db, "pass", id);
-    
-        try {
-          await updateDoc(docRef, newData);
-          setIsLoad(true);
-        } catch (error) {
-          setIsLoad(true);
-          console.error("Error updating document: ", error);
-        }
-      };
-
-      //не работает endblock 
 
    return (
     <View style={styles.page}>
@@ -111,7 +107,11 @@ export const MainPage = () => {
               <View key={data.id} style={styles.passwordItem}>
                 <Text style={styles.text}>{data.pass } {"\n"}</Text> 
                 <Text style={styles.passwordTime}>{data.created_at}</Text>
-                <Button onPress={() => DeletePass(data.id)} title="Delete" />
+
+                <View style={styles.ButtonsItem}>
+                  <Button onPress={() => DeletePass(data.id)} title="Delete" />
+                  <Button onPress={() => UpdatePass(data.id)} title="Update" />
+                </View>
               </View>
             ))}
           </View>
@@ -163,4 +163,10 @@ passwordItem: {
     color: 'gray',
     marginTop: 5,
   },
+  ButtonsItem: {
+    flexDirection: "row",
+    justifyContent: 'center',
+    marginBottom: 10,
+    marginVertical: 10,
+  }
 });
